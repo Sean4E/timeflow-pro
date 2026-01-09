@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="TimeFlow Pro - Smart Time Tracking PWA for freelancers and professionals">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TimeFlow Pro">
+
+    <title>TimeFlow Pro - Smart Time Tracker</title>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <div class="noise-overlay"></div>
+
+    <div class="app">
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="logo">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+                    <path d="M20 8v12l8 4" stroke="url(#logoGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="logoGradient" x1="20" y1="8" x2="28" y2="24">
+                            <stop stop-color="#6366f1"/>
+                            <stop offset="1" stop-color="#22c55e"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <button class="nav-btn active" data-screen="dashboard">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                <span>Clock</span>
+            </button>
+            <button class="nav-btn" data-screen="entries">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+                </svg>
+                <span>Entries</span>
+            </button>
+            <button class="nav-btn" data-screen="calendar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <path d="M16 2v4M8 2v4M3 10h18"/>
+                </svg>
+                <span>Calendar</span>
+            </button>
+            <button class="nav-btn" data-screen="reports">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                </svg>
+                <span>Reports</span>
+            </button>
+            <button class="nav-btn" data-screen="settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v4m0 14v4m-9-9h4m14 0h-4m-2.6-6.3l2.8-2.8M6.3 17.7l2.8-2.8m0-5.8L6.3 6.3m11.4 11.4l-2.8-2.8"/>
+                </svg>
+                <span>Settings</span>
+            </button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Dashboard Screen -->
+            <section id="dashboard" class="screen active">
+                <div class="header">
+                    <h1>TimeFlow Pro</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="openModal('projectModal')">
+                            + Project
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Clock Widget First -->
+                <div class="card clock-widget">
+                    <div class="clock-display" id="currentTime">00:00:00</div>
+                    <div class="clock-date" id="currentDate">Loading...</div>
+
+                    <div class="clock-buttons">
+                        <button class="clock-btn" id="clockBtn" onclick="toggleClock()">
+                            <span>CLOCK IN</span>
+                        </button>
+                        <div id="breakBtnContainer" style="display: none;">
+                            <button class="break-btn" id="breakBtn" onclick="toggleBreak()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="6" y="4" width="4" height="16"/>
+                                    <rect x="14" y="4" width="4" height="16"/>
+                                </svg>
+                                <span class="break-text">BREAK</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="session-info" id="sessionInfo" style="display: none;">
+                        <div class="session-project" id="sessionProject">Project Name</div>
+                        <div class="session-duration" id="sessionDuration">00:00:00</div>
+                        <div class="break-info" id="breakInfo" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Project Selector -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Select Project</span>
+                    </div>
+                    <div class="project-selector" id="projectSelector">
+                        <!-- Projects will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Quick Send Panel -->
+                <div class="quick-send-panel">
+                    <div class="quick-send-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        Quick Send Report
+                    </div>
+                    <button class="quick-send-btn" onclick="quickSendReport()">
+                        Send to Recipients
+                    </button>
+                </div>
+
+                <!-- Recent Entries -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Recent Entries</span>
+                        <button class="btn btn-secondary btn-sm" onclick="switchScreen('entries')">View All</button>
+                    </div>
+                    <div class="entry-list" id="recentEntries">
+                        <!-- Recent entries will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Entries Screen -->
+            <section id="entries" class="screen">
+                <div class="header">
+                    <h1>Time Entries</h1>
+                    <div class="header-actions">
+                        <button class="btn btn-primary btn-sm" onclick="openModal('entryModal')">
+                            + Manual Entry
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-filter="all">All</button>
+                        <button class="tab-btn" data-filter="today">Today</button>
+                        <button class="tab-btn" data-filter="week">Week</button>
+                        <button class="tab-btn" data-filter="month">Month</button>
+                    </div>
+                    <div class="entry-list" id="allEntries">
+                        <!-- All entries will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Calendar Screen -->
+            <section id="calendar" class="screen">
+                <div class="header">
+                    <h1>Calendar</h1>
+                    <div class="header-actions">
+                        <div class="calendar-view-toggle">
+                            <button class="calendar-view-btn active" data-view="month">Month</button>
+                            <button class="calendar-view-btn" data-view="week">Week</button>
+                            <button class="calendar-view-btn" data-view="day">Day</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <button class="btn btn-secondary btn-icon" onclick="changeMonth(-1)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        <span class="calendar-title" id="calendarTitle">January 2026</span>
+                        <button class="btn btn-secondary btn-icon" onclick="changeMonth(1)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="calendarContent">
+                        <!-- Calendar content will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Screen -->
+            <section id="reports" class="screen">
+                <div class="header">
+                    <h1>Reports</h1>
+                    <div class="header-actions">
+                        <div class="period-toggle">
+                            <button class="period-btn active" data-period="week">Week</button>
+                            <button class="period-btn" data-period="month">Month</button>
+                            <button class="period-btn" data-period="year">Year</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-summary">
+                    <div class="report-card">
+                        <div class="report-card-value" id="reportHours">0h</div>
+                        <div class="report-card-label">Total Hours</div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-card-value" id="reportEarnings">$0</div>
+                        <div class="report-card-label">Total Earnings</div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-card-value" id="reportAvgDay">0h</div>
+                        <div class="report-card-label">Avg / Day</div>
+                    </div>
+                    <div class="report-card">
+                        <div class="report-card-value" id="reportProjects">0</div>
+                        <div class="report-card-label">Active Projects</div>
+                    </div>
+                </div>
+
+                <div class="prediction-card">
+                    <div class="prediction-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Predictions (Based on Current Pace)
+                    </div>
+                    <div class="prediction-grid">
+                        <div class="prediction-item">
+                            <div class="prediction-value" id="predictWeek">$0</div>
+                            <div class="prediction-label">End of Week</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-value" id="predictMonth">$0</div>
+                            <div class="prediction-label">End of Month</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-value" id="predictHoursWeek">0h</div>
+                            <div class="prediction-label">Hours This Week</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="prediction-value" id="predictHoursMonth">0h</div>
+                            <div class="prediction-label">Hours This Month</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Hours by Project</div>
+                    <div class="bar-chart" id="projectChart">
+                        <!-- Chart bars will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-title">Daily Hours (Last 7 Days)</div>
+                    <div class="bar-chart" id="dailyChart">
+                        <!-- Chart bars will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Sent Reports / Payment Blocks -->
+                <div class="chart-container sent-reports-section">
+                    <div class="chart-title">Sent Reports (Payment Blocks)</div>
+                    <div id="sentReportsList">
+                        <!-- Sent reports will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="send-panel">
+                    <div class="send-panel-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                        Send Report to Recipients
+                    </div>
+                    <div class="send-summary" id="sendSummary">
+                        <!-- Summary will be inserted here -->
+                    </div>
+                    <button class="send-btn-large" id="sendReportBtn" onclick="sendReports()">
+                        Send Report Now
+                    </button>
+                </div>
+            </section>
+
+            <!-- Settings Screen -->
+            <section id="settings" class="screen">
+                <div class="header">
+                    <h1>Settings</h1>
+                </div>
+
+                <!-- Theme Settings -->
+                <div class="settings-section">
+                    <div class="settings-title">Theme</div>
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">Accent Color</label>
+                            <div class="accent-color-section">
+                                <input type="color" class="accent-color-picker" id="accentColorPicker" value="#6366f1">
+                                <div class="accent-color-presets">
+                                    <div class="accent-preset active" data-color="#6366f1" style="background: #6366f1;" title="Indigo"></div>
+                                    <div class="accent-preset" data-color="#8b5cf6" style="background: #8b5cf6;" title="Purple"></div>
+                                    <div class="accent-preset" data-color="#ec4899" style="background: #ec4899;" title="Pink"></div>
+                                    <div class="accent-preset" data-color="#ef4444" style="background: #ef4444;" title="Red"></div>
+                                    <div class="accent-preset" data-color="#f59e0b" style="background: #f59e0b;" title="Amber"></div>
+                                    <div class="accent-preset" data-color="#22c55e" style="background: #22c55e;" title="Green"></div>
+                                    <div class="accent-preset" data-color="#06b6d4" style="background: #06b6d4;" title="Cyan"></div>
+                                    <div class="accent-preset" data-color="#3b82f6" style="background: #3b82f6;" title="Blue"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Global Rates -->
+                <div class="settings-section">
+                    <div class="settings-title">Global Rate</div>
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">Default Hourly Rate</label>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <input type="number" class="form-input" id="globalRateInput" placeholder="0.00" step="0.01" style="flex: 1;" onchange="updateGlobalRate()">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="globalRateEnabled" checked onchange="toggleGlobalRate()">
+                                    <span>Auto-fill new projects</span>
+                                </label>
+                            </div>
+                            <div class="global-rate-indicator">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 16v-4M12 8h.01"/>
+                                </svg>
+                                <span>This rate will be suggested when creating new projects</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Section -->
+                <div class="settings-section">
+                    <div class="settings-title">Projects</div>
+                    <div class="project-list" id="projectList">
+                        <!-- Projects will be inserted here -->
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="openModal('projectModal')">
+                        + Add Project
+                    </button>
+                </div>
+
+                <!-- General Settings -->
+                <div class="settings-section">
+                    <div class="settings-title">General</div>
+                    <div class="card">
+                        <div class="form-group">
+                            <label class="form-label">Currency</label>
+                            <select class="form-select" id="currencySelect" onchange="updateCurrency()">
+                                <option value="EUR">Euro (EUR)</option>
+                                <option value="USD">US Dollar (USD)</option>
+                                <option value="GBP">British Pound (GBP)</option>
+                                <option value="JPY">Japanese Yen (JPY)</option>
+                                <option value="CAD">Canadian Dollar (CAD)</option>
+                                <option value="AUD">Australian Dollar (AUD)</option>
+                                <option value="CHF">Swiss Franc (CHF)</option>
+                                <option value="CNY">Chinese Yuan (CNY)</option>
+                                <option value="INR">Indian Rupee (INR)</option>
+                                <option value="BRL">Brazilian Real (BRL)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date Format</label>
+                            <select class="form-select" id="dateFormatSelect" onchange="updateDateFormat()">
+                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Time Format</label>
+                            <select class="form-select" id="timeFormatSelect" onchange="updateTimeFormat()">
+                                <option value="24">24 Hour</option>
+                                <option value="12">12 Hour (AM/PM)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Week Starts On</label>
+                            <select class="form-select" id="weekStartSelect" onchange="updateWeekStart()">
+                                <option value="0">Sunday</option>
+                                <option value="1">Monday</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipients Section -->
+                <div class="settings-section">
+                    <div class="settings-title">Recipients</div>
+                    <div id="recipientList">
+                        <!-- Recipients will be inserted here -->
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 1rem;" onclick="openModal('recipientModal')">
+                        + Add Recipient
+                    </button>
+                </div>
+
+                <!-- Data Management -->
+                <div class="settings-section">
+                    <div class="settings-title">Data Management</div>
+                    <div class="card">
+                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" onclick="exportData()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                                </svg>
+                                Export Data
+                            </button>
+                            <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                                </svg>
+                                Import Data
+                            </button>
+                            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                            <button class="btn btn-danger" onclick="confirmClearData()">
+                                Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About -->
+                <div class="settings-section">
+                    <div class="settings-title">About</div>
+                    <div class="card">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                            <strong>TimeFlow Pro</strong> v2.0<br>
+                            Smart Time Tracking for Professionals<br><br>
+                            Built with modern web technologies. Works offline as a PWA.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Project Modal -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="projectModalTitle">Add Project</h3>
+                <button class="modal-close" onclick="closeModal('projectModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editProjectId">
+                <div class="form-group">
+                    <label class="form-label">Project Name</label>
+                    <input type="text" class="form-input" id="projectName" placeholder="e.g., Website Redesign">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Client (Optional)</label>
+                    <input type="text" class="form-input" id="projectClient" placeholder="e.g., Acme Corp">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hourly Rate</label>
+                    <input type="number" class="form-input" id="projectRate" placeholder="0.00" step="0.01">
+                    <div class="global-rate-indicator" id="globalRateHint" style="display: none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                        <span>Using global rate. Edit to override.</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Color</label>
+                    <div class="color-options" id="colorOptions">
+                        <div class="color-option selected" data-color="#6366f1" style="background: #6366f1;"></div>
+                        <div class="color-option" data-color="#22c55e" style="background: #22c55e;"></div>
+                        <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+                        <div class="color-option" data-color="#ef4444" style="background: #ef4444;"></div>
+                        <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+                        <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
+                        <div class="color-option" data-color="#06b6d4" style="background: #06b6d4;"></div>
+                        <div class="color-option" data-color="#84cc16" style="background: #84cc16;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveProject()">Save Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Entry Modal -->
+    <div class="modal-overlay" id="entryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="entryModalTitle">Add Manual Entry</h3>
+                <button class="modal-close" onclick="closeModal('entryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editEntryId">
+                <div class="form-group">
+                    <label class="form-label">Project</label>
+                    <select class="form-select" id="entryProject">
+                        <!-- Projects will be inserted here -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="entryDate">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Start Time</label>
+                        <input type="time" class="form-input" id="entryStart">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Time</label>
+                        <input type="time" class="form-input" id="entryEnd">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes (Optional)</label>
+                    <textarea class="form-textarea" id="entryNotes" placeholder="What did you work on?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('entryModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEntry()">Save Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipient Modal -->
+    <div class="modal-overlay" id="recipientModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="recipientModalTitle">Add Recipient</h3>
+                <button class="modal-close" onclick="closeModal('recipientModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editRecipientId">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="recipientName" placeholder="e.g., John Smith">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="recipientEmail" placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone (Optional, for SMS)</label>
+                    <input type="tel" class="form-input" id="recipientPhone" placeholder="+353 123 456 789">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Send Via</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="sendEmail" checked>
+                            <span>Email</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="sendSMS">
+                            <span>SMS</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Information Layers</label>
+                    <div class="checkbox-group" style="flex-direction: column; align-items: flex-start;">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="layerHoursOnly">
+                            <span>Hours Only (no earnings, just total hours)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="layerSummary" checked>
+                            <span>Summary (Total hours & earnings)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="layerProjects" checked>
+                            <span>Project Breakdown</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="layerDetailed">
+                            <span>Detailed Entries (Times & notes)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="layerRates">
+                            <span>Show Rates</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('recipientModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveRecipient()">Save Recipient</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Send Modal -->
+    <div class="modal-overlay" id="confirmSendModal">
+        <div class="modal">
+            <div class="modal-body confirm-modal">
+                <svg class="confirm-modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                </svg>
+                <div class="confirm-modal-title">Send Report?</div>
+                <div class="confirm-modal-message">
+                    This will send the report to all configured recipients and lock the entries from further editing.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('confirmSendModal')">Cancel</button>
+                <button class="btn btn-success" onclick="confirmSendReports()">Yes, Send Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "name": "TimeFlow Pro",
+  "short_name": "TimeFlow",
+  "description": "Smart Time Tracking for Professionals - Track hours, manage projects, and send reports",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Clock In",
+      "short_name": "Clock In",
+      "description": "Start tracking time",
+      "url": "/?action=clockin",
+      "icons": [{ "src": "icons/favicon.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "View Reports",
+      "short_name": "Reports",
+      "description": "View your time reports",
+      "url": "/?screen=reports",
+      "icons": [{ "src": "icons/favicon.svg", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
