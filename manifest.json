@@ -2,12 +2,12 @@
   "name": "TimeFlow Pro",
   "short_name": "TimeFlow",
   "description": "Smart Time Tracking for Professionals - Track hours, manage projects, and send reports",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#6366f1",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "./",
   "icons": [
     {
       "src": "icons/favicon.svg",

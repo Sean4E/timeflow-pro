@@ -1,13 +1,13 @@
 const CACHE_NAME = 'timeflow-pro-v2.0';
 const ASSETS_TO_CACHE = [
-    '/',
-    '/index.html',
-    '/css/styles.css',
-    '/js/app.js',
-    '/manifest.json',
-    '/icons/favicon.svg',
-    '/icons/icon-192.svg',
-    '/icons/icon-512.svg',
+    './',
+    './index.html',
+    './css/styles.css',
+    './js/app.js',
+    './manifest.json',
+    './icons/favicon.svg',
+    './icons/icon-192.svg',
+    './icons/icon-512.svg',
     'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap'
 ];
 
@@ -89,7 +89,7 @@ self.addEventListener('fetch', (event) => {
                     .catch(() => {
                         // Return offline page for navigation requests
                         if (event.request.mode === 'navigate') {
-                            return caches.match('/index.html');
+                            return caches.match('./index.html');
                         }
                     });
             })
