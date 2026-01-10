@@ -18,3 +18,7 @@ _BACKUPS/
 .env
 .env.local
 .claude/
+
+# Node
+node_modules/
+package-lock.json

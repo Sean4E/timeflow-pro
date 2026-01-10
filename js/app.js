@@ -1943,6 +1943,32 @@ function setupPeriodToggle() {
     });
 }
 
+// Handle Enter key to submit active modal
+function handleModalEnterKey(e) {
+    if (e.key !== 'Enter') return;
+
+    // Don't trigger if user is in a textarea
+    if (e.target.tagName === 'TEXTAREA') return;
+
+    // Check which modal is active and call the appropriate save function
+    if (document.getElementById('projectModal')?.classList.contains('active')) {
+        e.preventDefault();
+        saveProject();
+    } else if (document.getElementById('entryModal')?.classList.contains('active')) {
+        e.preventDefault();
+        saveEntry();
+    } else if (document.getElementById('recipientModal')?.classList.contains('active')) {
+        e.preventDefault();
+        saveRecipient();
+    } else if (document.getElementById('confirmSendModal')?.classList.contains('active')) {
+        e.preventDefault();
+        confirmSendReports();
+    }
+}
+
+// Add global Enter key listener for modals
+document.addEventListener('keydown', handleModalEnterKey);
+
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) modal.classList.add('active');

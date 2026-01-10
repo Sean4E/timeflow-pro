@@ -1,4 +1,4 @@
-const CACHE_NAME = 'timeflow-pro-v2.0';
+const CACHE_NAME = 'timeflow-pro-v2.1';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -8,6 +8,9 @@ const ASSETS_TO_CACHE = [
     './icons/favicon.svg',
     './icons/icon-192.svg',
     './icons/icon-512.svg',
+    './icons/icon-192.png',
+    './icons/icon-512.png',
+    './icons/apple-touch-icon.png',
     'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap'
 ];
 
