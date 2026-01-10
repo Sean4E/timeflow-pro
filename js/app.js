@@ -4,7 +4,6 @@ let state = {
     entries: [],
     recipients: [],
     sentReports: [], // Track sent report blocks
-    breaks: [], // Track breaks within sessions
     settings: {
         currency: 'EUR',
         currencySymbol: '€',
@@ -745,7 +744,7 @@ function saveEntry() {
                 earnings,
                 notes,
                 breakTime: totalBreakMs,
-                breaks: entryBreaks.length
+                breaks: entryBreaks
             };
         }
     } else {
@@ -762,7 +761,7 @@ function saveEntry() {
             notes,
             locked: false,
             breakTime: totalBreakMs,
-            breaks: entryBreaks.length
+            breaks: entryBreaks
         });
     }
 
@@ -790,6 +789,23 @@ function editEntry(id) {
     document.getElementById('entryStart').value = `${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2, '0')}`;
     document.getElementById('entryEnd').value = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
     document.getElementById('entryNotes').value = entry.notes || '';
+
+    // Clear existing breaks and repopulate from entry data
+    clearEntryBreaks();
+    if (entry.breaks && Array.isArray(entry.breaks)) {
+        entry.breaks.forEach(b => {
+            addBreakRow();
+            const container = document.getElementById('entryBreaksList');
+            const lastRow = container.lastElementChild;
+            if (lastRow) {
+                const startInput = lastRow.querySelector('.break-start');
+                const endInput = lastRow.querySelector('.break-end');
+                if (startInput) startInput.value = b.start;
+                if (endInput) endInput.value = b.end;
+            }
+        });
+        updateBreakSummary();
+    }
 
     openModal('entryModal');
 }
@@ -820,9 +836,9 @@ function addBreakRow() {
     row.className = 'entry-break-row';
     row.id = breakId;
     row.innerHTML = `
-        <input type="time" class="form-control break-start" placeholder="Start" onchange="updateBreakSummary()">
+        <input type="time" class="form-input break-start" placeholder="Start" onchange="updateBreakSummary()">
         <span class="break-separator">to</span>
-        <input type="time" class="form-control break-end" placeholder="End" onchange="updateBreakSummary()">
+        <input type="time" class="form-input break-end" placeholder="End" onchange="updateBreakSummary()">
         <button type="button" class="btn btn-danger btn-icon btn-sm" onclick="removeBreakRow('${breakId}')" title="Remove">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M18 6L6 18M6 6l12 12"/>
