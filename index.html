@@ -538,6 +538,21 @@
                         <input type="time" class="form-input" id="entryEnd">
                     </div>
                 </div>
+
+                <!-- Breaks Section -->
+                <div class="form-group">
+                    <div class="card-header" style="margin-bottom: 0.5rem; padding: 0;">
+                        <label class="form-label" style="margin: 0;">Breaks (Optional)</label>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="addBreakRow()">+ Add Break</button>
+                    </div>
+                    <div id="entryBreaksList" class="entry-breaks-list">
+                        <!-- Break rows will be inserted here -->
+                    </div>
+                    <div id="entryBreaksSummary" class="breaks-summary" style="display: none;">
+                        Total break time: <span id="totalBreakTime">0:00</span>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Notes (Optional)</label>
                     <textarea class="form-textarea" id="entryNotes" placeholder="What did you work on?"></textarea>

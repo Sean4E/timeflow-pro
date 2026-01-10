@@ -62,7 +62,23 @@ function init() {
     // Restore session UI if active
     if (state.currentSession) {
         updateClockButtonState();
+        restoreSessionUI();
     }
+}
+
+function restoreSessionUI() {
+    if (!state.currentSession) return;
+
+    const project = state.projects.find(p => p.id === state.currentSession.projectId);
+
+    const sessionInfoEl = document.getElementById('sessionInfo');
+    const sessionProjectEl = document.getElementById('sessionProject');
+
+    if (sessionInfoEl) sessionInfoEl.style.display = 'block';
+    if (sessionProjectEl && project) sessionProjectEl.textContent = project.name;
+
+    // Immediately update the duration display
+    updateSessionDuration();
 }
 
 function loadData() {
@@ -693,8 +709,24 @@ function saveEntry() {
         return;
     }
 
-    const duration = endTime - startTime;
-    const hours = duration / 3600000;
+    // Calculate breaks
+    const entryBreaks = getEntryBreaks();
+    let totalBreakMs = 0;
+
+    entryBreaks.forEach(b => {
+        const startParts = b.start.split(':');
+        const endParts = b.end.split(':');
+        const breakStartMs = (parseInt(startParts[0]) * 60 + parseInt(startParts[1])) * 60000;
+        const breakEndMs = (parseInt(endParts[0]) * 60 + parseInt(endParts[1])) * 60000;
+
+        if (breakEndMs > breakStartMs) {
+            totalBreakMs += (breakEndMs - breakStartMs);
+        }
+    });
+
+    const grossDuration = endTime - startTime;
+    const netDuration = grossDuration - totalBreakMs;
+    const hours = netDuration / 3600000;
     const project = state.projects.find(p => p.id === projectId);
     const earnings = hours * (project?.rate || 0);
 
@@ -708,10 +740,12 @@ function saveEntry() {
                 date,
                 startTime: startTime.toISOString(),
                 endTime: endTime.toISOString(),
-                duration,
+                duration: netDuration,
                 hours,
                 earnings,
-                notes
+                notes,
+                breakTime: totalBreakMs,
+                breaks: entryBreaks.length
             };
         }
     } else {
@@ -722,11 +756,13 @@ function saveEntry() {
             date,
             startTime: startTime.toISOString(),
             endTime: endTime.toISOString(),
-            duration,
+            duration: netDuration,
             hours,
             earnings,
             notes,
-            locked: false
+            locked: false,
+            breakTime: totalBreakMs,
+            breaks: entryBreaks.length
         });
     }
 
@@ -735,6 +771,7 @@ function saveEntry() {
 
     saveData();
     closeModal('entryModal');
+    clearEntryBreaks();
     renderAll();
     showToast(id ? 'Entry updated' : 'Entry added', 'success');
 }
@@ -767,6 +804,114 @@ function deleteEntry(id) {
     saveData();
     renderAll();
     showToast('Entry deleted', 'success');
+}
+
+// ==================== MANUAL ENTRY BREAKS ====================
+let entryBreakCounter = 0;
+
+function addBreakRow() {
+    const container = document.getElementById('entryBreaksList');
+    if (!container) return;
+
+    entryBreakCounter++;
+    const breakId = `entry-break-${entryBreakCounter}`;
+
+    const row = document.createElement('div');
+    row.className = 'entry-break-row';
+    row.id = breakId;
+    row.innerHTML = `
+        <input type="time" class="form-control break-start" placeholder="Start" onchange="updateBreakSummary()">
+        <span class="break-separator">to</span>
+        <input type="time" class="form-control break-end" placeholder="End" onchange="updateBreakSummary()">
+        <button type="button" class="btn btn-danger btn-icon btn-sm" onclick="removeBreakRow('${breakId}')" title="Remove">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+        </button>
+    `;
+
+    container.appendChild(row);
+    updateBreakSummary();
+}
+
+function removeBreakRow(breakId) {
+    const row = document.getElementById(breakId);
+    if (row) {
+        row.remove();
+        updateBreakSummary();
+    }
+}
+
+function updateBreakSummary() {
+    const container = document.getElementById('entryBreaksList');
+    const summary = document.getElementById('entryBreaksSummary');
+    const totalDisplay = document.getElementById('totalBreakTime');
+
+    if (!container || !summary) return;
+
+    const breakRows = container.querySelectorAll('.entry-break-row');
+    let totalBreakMs = 0;
+
+    breakRows.forEach(row => {
+        const startInput = row.querySelector('.break-start');
+        const endInput = row.querySelector('.break-end');
+
+        if (startInput?.value && endInput?.value) {
+            const startParts = startInput.value.split(':');
+            const endParts = endInput.value.split(':');
+
+            const startMs = (parseInt(startParts[0]) * 60 + parseInt(startParts[1])) * 60000;
+            const endMs = (parseInt(endParts[0]) * 60 + parseInt(endParts[1])) * 60000;
+
+            if (endMs > startMs) {
+                totalBreakMs += (endMs - startMs);
+            }
+        }
+    });
+
+    if (breakRows.length > 0) {
+        summary.style.display = 'block';
+        if (totalDisplay) {
+            const totalMinutes = Math.floor(totalBreakMs / 60000);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            totalDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}`;
+        }
+    } else {
+        summary.style.display = 'none';
+    }
+}
+
+function getEntryBreaks() {
+    const container = document.getElementById('entryBreaksList');
+    if (!container) return [];
+
+    const breaks = [];
+    const breakRows = container.querySelectorAll('.entry-break-row');
+
+    breakRows.forEach(row => {
+        const startInput = row.querySelector('.break-start');
+        const endInput = row.querySelector('.break-end');
+
+        if (startInput?.value && endInput?.value) {
+            breaks.push({
+                start: startInput.value,
+                end: endInput.value
+            });
+        }
+    });
+
+    return breaks;
+}
+
+function clearEntryBreaks() {
+    const container = document.getElementById('entryBreaksList');
+    const summary = document.getElementById('entryBreaksSummary');
+
+    if (container) container.innerHTML = '';
+    if (summary) summary.style.display = 'none';
+
+    entryBreakCounter = 0;
 }
 
 // ==================== CALENDAR ====================
@@ -1396,13 +1541,24 @@ function confirmSendReports() {
     }
 
     const startStr = startDate.toISOString().split('T')[0];
-    const periodEntries = state.entries.filter(e => e.date >= startStr && !e.locked);
 
-    const totalHours = periodEntries.reduce((sum, e) => sum + e.hours, 0);
-    const totalEarnings = periodEntries.reduce((sum, e) => sum + e.earnings, 0);
+    // Get ALL entries for the period (for the report content)
+    const allPeriodEntries = state.entries.filter(e => e.date >= startStr);
 
-    // Lock these entries
-    periodEntries.forEach(e => {
+    // Get only unlocked entries (these will be locked)
+    const unlockedEntries = allPeriodEntries.filter(e => !e.locked);
+
+    // Calculate totals from ALL period entries
+    const totalHours = allPeriodEntries.reduce((sum, e) => sum + (e.hours || 0), 0);
+    const totalEarnings = allPeriodEntries.reduce((sum, e) => sum + (e.earnings || 0), 0);
+
+    if (allPeriodEntries.length === 0) {
+        showToast('No entries to send for this period', 'error');
+        return;
+    }
+
+    // Lock the unlocked entries
+    unlockedEntries.forEach(e => {
         e.locked = true;
     });
 
@@ -1414,12 +1570,12 @@ function confirmSendReports() {
         hours: totalHours,
         earnings: totalEarnings,
         recipientCount: recipients.length,
-        entryIds: periodEntries.map(e => e.id)
+        entryIds: unlockedEntries.map(e => e.id)
     });
 
-    // Generate report for each recipient
+    // Generate report for each recipient using ALL period entries
     recipients.forEach(recipient => {
-        const report = generateReport(recipient, periodEntries);
+        const report = generateReport(recipient, allPeriodEntries);
 
         if (recipient.sendEmail) {
             // Open email client
@@ -1437,7 +1593,7 @@ function confirmSendReports() {
 
     saveData();
     renderAll();
-    showToast(`Report sent to ${recipients.length} recipient(s). Entries locked.`, 'success');
+    showToast(`Report sent to ${recipients.length} recipient(s). ${unlockedEntries.length} entries locked.`, 'success');
 }
 
 function quickSendReport() {
@@ -1446,6 +1602,45 @@ function quickSendReport() {
         showToast('No recipients configured. Go to Settings to add recipients.', 'error');
         return;
     }
+
+    // Quick send uses the current report period (week by default)
+    // Show summary in confirmation modal
+    const now = new Date();
+    let startDate;
+
+    switch (state.reportPeriod) {
+        case 'week':
+            startDate = getWeekStart(now);
+            break;
+        case 'month':
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            break;
+        case 'year':
+            startDate = new Date(now.getFullYear(), 0, 1);
+            break;
+    }
+
+    const startStr = startDate.toISOString().split('T')[0];
+    const periodEntries = state.entries.filter(e => e.date >= startStr);
+    const totalHours = periodEntries.reduce((sum, e) => sum + (e.hours || 0), 0);
+    const totalEarnings = periodEntries.reduce((sum, e) => sum + (e.earnings || 0), 0);
+
+    if (periodEntries.length === 0) {
+        showToast('No entries to send for this period', 'error');
+        return;
+    }
+
+    // Update the confirmation modal with current data
+    const confirmMessage = document.querySelector('#confirmSendModal .confirm-modal-message');
+    if (confirmMessage) {
+        confirmMessage.innerHTML = `
+            This will send a <strong>${state.reportPeriod}</strong> report with:<br><br>
+            <strong>${formatHours(totalHours)}</strong> hours | <strong>${formatCurrency(totalEarnings)}</strong> earnings<br>
+            <strong>${periodEntries.length}</strong> entries to <strong>${recipients.length}</strong> recipient(s)<br><br>
+            Unlocked entries will be locked after sending.
+        `;
+    }
+
     openModal('confirmSendModal');
 }
 
@@ -1763,6 +1958,7 @@ function openModal(modalId) {
         document.getElementById('entryStart').value = '';
         document.getElementById('entryEnd').value = '';
         document.getElementById('entryNotes').value = '';
+        clearEntryBreaks();
     }
 
     if (modalId === 'recipientModal' && !document.getElementById('editRecipientId').value) {

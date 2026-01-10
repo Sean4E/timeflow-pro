@@ -1721,3 +1721,48 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     opacity: 0.6;
     cursor: pointer;
 }
+
+/* Manual Entry Breaks */
+.entry-breaks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.entry-break-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.entry-break-row .form-control {
+    flex: 1;
+    min-width: 0;
+}
+
+.break-separator {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.breaks-summary {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(var(--accent-rgb), 0.1);
+    border: 1px solid rgba(var(--accent-rgb), 0.2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.breaks-summary span {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-weight: 600;
+}
